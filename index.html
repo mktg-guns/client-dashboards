@@ -1,21 +1,612 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
-<title>MKTG Guns — Client Portal</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Pro Melbourne — SEO Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
 <style>
-  body{margin:0;background:#0a0a0b;color:#e8e8ea;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
-  .box h1{font-size:20px;font-weight:700;margin:0 0 6px}
-  .box h1 span{color:#f97316}
-  .box p{color:#8b8b93;font-size:14px;margin:0}
+  :root {
+    --bg: #0a0d14;
+    --surface: #111827;
+    --surface2: #1f2937;
+    --border: #1f2937;
+    --border2: #374151;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+    --subtle: #9ca3af;
+    --orange: #f97316;
+    --orange-dim: #c2570d;
+    --green: #22c55e;
+    --red: #ef4444;
+    --amber: #f59e0b;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; min-height: 100vh; }
+  .tab-btn { border-bottom: 2px solid transparent; transition: all .15s; color: var(--muted); }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; }
+  .kpi-val { font-size: 2rem; font-weight: 700; line-height: 1; }
+  .kpi-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+  .delta-up { color: var(--green); }
+  .delta-down { color: var(--red); }
+  .delta-flat { color: var(--muted); }
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .badge-done { background: #052e16; color: var(--green); }
+  .badge-tbc { background: #1c1917; color: var(--amber); }
+  .badge-parked { background: #1e1b4b; color: #818cf8; }
+  .badge-shipped { background: #0c1a2e; color: #60a5fa; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  thead th { text-transform: uppercase; letter-spacing: .05em; font-size: 0.7rem; color: var(--muted); padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border2); }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody td { padding: 10px 12px; color: var(--subtle); }
+  tbody td.primary { color: var(--text); }
+  .pos-up { color: var(--green); font-weight: 700; }
+  .pos-down { color: var(--red); font-weight: 700; }
+  .pos-flat { color: var(--muted); }
+  .url-chip { font-size: 0.68rem; color: var(--muted); background: var(--surface2); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+  .cluster-tag { font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .cluster-money { background: #1a2410; color: #86efac; }
+  .cluster-van { background: #0c1a2e; color: #93c5fd; }
+  .cluster-bucket { background: #1f1208; color: #fdba74; }
+  .cluster-harvest { background: #1c1917; color: #78716c; }
+  .cluster-canopy { background: #0f1f1f; color: #5eead4; }
+  .work-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-bottom: 10px; }
+  .work-item h3 { font-size: 0.9rem; font-weight: 600; margin: 0 0 4px 0; }
+  .work-item p { font-size: 0.8rem; color: var(--muted); margin: 4px 0 0 0; line-height: 1.5; }
+  .opp-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--orange); border-radius: 8px; padding: 16px 20px; margin-bottom: 10px; }
+  .opp-card h3 { font-size: 0.9rem; font-weight: 600; margin: 0 0 4px 0; }
+  .opp-card p { font-size: 0.8rem; color: var(--muted); margin: 4px 0 0 0; }
+  .opp-vol { font-size: 0.75rem; font-weight: 600; color: var(--orange); }
+  #gate { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 999; }
+  #gate-box { background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; padding: 48px 40px; text-align: center; width: 340px; }
+  #gate-box input { width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); padding: 10px 14px; font-size: 0.95rem; outline: none; margin-top: 16px; }
+  #gate-box input:focus { border-color: var(--orange); }
+  #gate-box button { width: 100%; margin-top: 12px; background: var(--orange); color: #fff; border: none; border-radius: 8px; padding: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+  #gate-box button:hover { background: var(--orange-dim); }
+  #gate-err { color: var(--red); font-size: 0.8rem; margin-top: 8px; min-height: 18px; }
+  .section-head { font-size: 0.7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 0 0 12px 0; font-weight: 600; }
+  .note-box { background: var(--surface2); border: 1px solid var(--border2); border-radius: 6px; padding: 10px 14px; font-size: 0.8rem; color: var(--muted); }
+  .content-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+  .content-row:last-child { border-bottom: none; }
+  .mini-badge { font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+  .mb-live { background: #052e16; color: var(--green); }
+  .mb-tbc { background: #1c1917; color: var(--amber); }
+  .mb-parked { background: #1e1b4b; color: #818cf8; }
+  .scrollable { overflow-x: auto; }
+  @media (max-width: 640px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr !important; }
+    .kpi-val { font-size: 1.5rem; }
+  }
 </style>
 </head>
 <body>
-<div class="box">
-  <h1>MKTG <span>Guns</span></h1>
-  <p>Client dashboards are accessed via your private link.<br>Check your latest email from us, or get in touch: rd@mktgguns.com</p>
+
+<!-- PASSWORD GATE -->
+<div id="gate">
+  <div id="gate-box">
+    <div style="color:var(--orange);font-size:1.4rem;font-weight:800;letter-spacing:-.02em;">MKTG GUNS</div>
+    <div style="color:var(--muted);font-size:0.8rem;margin-top:4px;">3D Pro Melbourne — SEO Dashboard</div>
+    <input type="password" id="pw" placeholder="Access code" autocomplete="off" />
+    <div id="gate-err"></div>
+    <button onclick="checkPw()">Enter</button>
+  </div>
 </div>
+
+<!-- DASHBOARD (hidden until unlocked) -->
+<div id="dashboard" style="display:none;">
+
+  <!-- HEADER -->
+  <header style="background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span style="color:var(--orange);font-weight:800;font-size:1.1rem;letter-spacing:-.01em;">MKTG GUNS</span>
+      <span style="color:var(--border2);">×</span>
+      <span style="font-weight:600;font-size:0.95rem;">3D Pro Melbourne</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:20px;">
+      <span style="font-size:0.75rem;color:var(--muted);">3dpromelbourne.com.au</span>
+      <span style="font-size:0.75rem;color:var(--muted);background:var(--surface2);padding:3px 10px;border-radius:20px;">Snapshot: 21 Sep 2026</span>
+    </div>
+  </header>
+
+  <!-- TAB NAV -->
+  <nav style="background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;display:flex;gap:0;">
+    <button class="tab-btn active" onclick="switchTab('overview')" style="padding:14px 18px;font-size:0.85rem;font-weight:600;background:none;border:none;cursor:pointer;">Overview</button>
+    <button class="tab-btn" onclick="switchTab('rankings')" style="padding:14px 18px;font-size:0.85rem;font-weight:600;background:none;border:none;cursor:pointer;">Rankings</button>
+    <button class="tab-btn" onclick="switchTab('work')" style="padding:14px 18px;font-size:0.85rem;font-weight:600;background:none;border:none;cursor:pointer;">Sep Changes</button>
+    <button class="tab-btn" onclick="switchTab('plan')" style="padding:14px 18px;font-size:0.85rem;font-weight:600;background:none;border:none;cursor:pointer;">Content Plan</button>
+    <button class="tab-btn" onclick="switchTab('gaps')" style="padding:14px 18px;font-size:0.85rem;font-weight:600;background:none;border:none;cursor:pointer;">Opportunities</button>
+  </nav>
+
+  <!-- TAB PANELS -->
+  <main style="max-width:1100px;margin:0 auto;padding:28px 20px;">
+
+    <!-- OVERVIEW TAB -->
+    <div id="tab-overview" class="tab-panel active">
+      <p class="section-head">Monthly Performance — Sep 2026 vs Aug 2026</p>
+      <div class="kpi-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;">
+        <div class="kpi">
+          <div class="kpi-label">AU Organic Traffic</div>
+          <div class="kpi-val">1,087</div>
+          <div style="font-size:0.8rem;margin-top:6px;" class="delta-down">↓ 305 vs Aug 31 (−22%)</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Ranking Keywords</div>
+          <div class="kpi-val">185</div>
+          <div style="font-size:0.8rem;margin-top:6px;" class="delta-down">↓ 11 vs Aug 31 (−6%)</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Top-3 Positions</div>
+          <div class="kpi-val">53</div>
+          <div style="font-size:0.8rem;margin-top:6px;" class="delta-flat">− 1 vs Aug 31 (flat)</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Traffic Value (AU)</div>
+          <div class="kpi-val">$363</div>
+          <div style="font-size:0.8rem;margin-top:6px;" class="delta-down">↓ $127 vs Aug 31 (−26%)</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Live Backlinks</div>
+          <div class="kpi-val">67,357</div>
+          <div style="font-size:0.8rem;margin-top:6px;" class="delta-up">↑ 1,596 vs Aug 31</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Referring Domains</div>
+          <div class="kpi-val">2,437</div>
+          <div style="font-size:0.8rem;margin-top:6px;" class="delta-flat">− 47 vs Aug 31 (flat)</div>
+        </div>
+      </div>
+
+      <div class="note-box" style="margin-bottom:24px;border-left:3px solid var(--amber);">
+        <strong style="color:var(--amber);">Traffic context:</strong> The month-on-month drop is driven by Packout terms declining as Milwaukee Packout SKUs are discontinued — planned and expected. Pack-A-Shelf, van cluster, and bucket terms are stable or growing. See Rankings tab for breakdown.
+      </div>
+
+      <p class="section-head">Top movers this month</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <div style="font-size:0.75rem;color:var(--green);font-weight:600;margin-bottom:8px;">▲ CLIMBERS</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+            <div style="display:grid;grid-template-columns:1fr auto auto;padding:10px 14px;border-bottom:1px solid var(--border);font-size:0.8rem;align-items:center;">
+              <span style="color:var(--text);">ute shelving</span>
+              <span style="color:var(--muted);font-size:0.75rem;">#9 → #6</span>
+              <span class="delta-up" style="font-size:0.75rem;margin-left:12px;">+12 traffic</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr auto auto;padding:10px 14px;border-bottom:1px solid var(--border);font-size:0.8rem;align-items:center;">
+              <span style="color:var(--text);">packout crate</span>
+              <span style="color:var(--muted);font-size:0.75rem;">#3 stable</span>
+              <span class="delta-up" style="font-size:0.75rem;margin-left:12px;">+7 traffic</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr auto auto;padding:10px 14px;border-bottom:1px solid var(--border);font-size:0.8rem;align-items:center;">
+              <span style="color:var(--text);">horse feed buckets</span>
+              <span style="color:var(--muted);font-size:0.75rem;">#9 → #6</span>
+              <span class="delta-up" style="font-size:0.75rem;margin-left:12px;">+3 traffic</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr auto auto;padding:10px 14px;border-bottom:1px solid var(--border);font-size:0.8rem;align-items:center;">
+              <span style="color:var(--text);">packout van setup</span>
+              <span style="color:var(--muted);font-size:0.75rem;">#2 → #1</span>
+              <span class="delta-up" style="font-size:0.75rem;margin-left:12px;">+4 traffic</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr auto auto;padding:10px 14px;font-size:0.8rem;align-items:center;">
+              <span style="color:var(--text);">milwaukee m12 battery holder</span>
+              <span style="color:var(--muted);font-size:0.75rem;">NEW #2</span>
+              <span class="delta-up" style="font-size:0.75rem;margin-left:12px;">+11 traffic</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:0.75rem;color:var(--red);font-weight:600;margin-bottom:8px;">▼ DROPS (Packout delisting)</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+            <div style="display:grid;grid-template-columns:1fr auto auto;padding:10px 14px;border-bottom:1px solid var(--border);font-size:0.8rem;align-items:center;">
+              <span style="color:var(--text);">milwaukee packout</span>
+              <span style="color:var(--muted);font-size:0.75rem;">#15 → #20</span>
+              <span class="delta-down" style="font-size:0.75rem;margin-left:12px;">−37 traffic</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr auto auto;padding:10px 14px;border-bottom:1px solid var(--border);font-size:0.8rem;align-items:center;">
+              <span style="color:var(--text);">milwaukee packout accessories</span>
+              <span style="color:var(--muted);font-size:0.75rem;">#4 → #6</span>
+              <span class="delta-down" style="font-size:0.75rem;margin-left:12px;">−11 traffic</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr auto auto;padding:10px 14px;font-size:0.8rem;align-items:center;">
+              <span style="color:var(--text);">packout milwaukee</span>
+              <span style="color:var(--muted);font-size:0.75rem;">#8 → #11</span>
+              <span class="delta-down" style="font-size:0.75rem;margin-left:12px;">−7 traffic</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RANKINGS TAB -->
+    <div id="tab-rankings" class="tab-panel">
+      <p class="section-head">Top 50 keywords by AU traffic — 21 Sep 2026 vs 31 Aug 2026</p>
+      <div class="scrollable">
+        <table>
+          <thead>
+            <tr>
+              <th>Keyword</th>
+              <th style="text-align:center;">Pos</th>
+              <th style="text-align:center;">Chg</th>
+              <th style="text-align:right;">Traffic</th>
+              <th style="text-align:right;">Vol</th>
+              <th style="text-align:right;">KD</th>
+              <th>Cluster</th>
+            </tr>
+          </thead>
+          <tbody id="kw-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SEP CHANGES TAB -->
+    <div id="tab-work" class="tab-panel">
+      <p class="section-head">September 2026 — on-page work completed</p>
+
+      <div class="work-item">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <h3>Tradie Canopy Setup Guide — Content Published</h3>
+          <span class="badge badge-done">✓ Done</span>
+        </div>
+        <p>Sep roadmap content piece (commercial-buyer canopy angle) written and published to the site. Next month: GSC submit + schema check.</p>
+      </div>
+
+      <div class="work-item">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <h3>/collections/folding-buckets — Hero & Tile Updates</h3>
+          <span class="badge badge-done">✓ Done</span>
+        </div>
+        <p>On-page touchup across hero and audience tiles. Mobile fix: "Home &amp; Outdoors" audience tile clipped on mobile — shortened to "Home &amp; Yard" to match "Job Site" width. Stays live as the SEO hub, not redirected.</p>
+      </div>
+
+      <div class="work-item">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <h3>/pages/tradie-folding-buckets — Keyword Pivot + New Content</h3>
+          <span class="badge badge-done">✓ Done</span>
+        </div>
+        <p>Retargeted from scattered mini-trade cluster → <strong>"heavy duty"</strong> as primary angle (100/mo, KD 0, $4 CPC). Replaced grandfathered camping content with 4 accordion tabs: watertight proof, build quality, load ratings, heavy-duty positioning. FAQ updated. New meta: <em>Heavy Duty Folding Bucket | Built for Tradies | 3DPRO</em>.</p>
+      </div>
+
+      <div class="work-item">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <h3>/pages/foldingbuckets — Architecture Decision</h3>
+          <span class="badge badge-done">✓ Done</span>
+        </div>
+        <p>Decision: <strong>no SEO targeting on this page.</strong> URL already competes with "folding bucket" — targeting it would cannibalise the collection's ranking. Stays as a pure navigation/conversion hub. Sub-pages own the niche terms. Also identified: intentional Custom Liquid CSS block hiding header nav (likely a Meta ads paid-LP setup — confirmed via source inspection, not a bug).</p>
+      </div>
+
+      <div class="work-item">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <h3>Lifestyle Sub-Pages — Internal Linking Complete</h3>
+          <span class="badge badge-done">✓ Done</span>
+        </div>
+        <p>All lifestyle sub-pages (Beach, Livestock, Kids Sport, Camping, Home-DIY) now carry a circle-icon menu cross-linking to all siblings AND back up to the lifestyle hub as the first circle. Sub↔sub and sub→hub linking complete.</p>
+      </div>
+
+      <div class="work-item">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <h3>Product Page (long-time ranker) — Lifestyle Tab Added</h3>
+          <span class="badge badge-done">✓ Done</span>
+        </div>
+        <p>Added "Off the Clock" lifestyle accordion tab to existing tradie-framed product page. Keyword-light (no exact-match lifestyle head terms) — conversion play so lifestyle buyers see themselves on the page without cannibalising the sub-pages. Existing tradie content untouched (multi-year rankings not gambled on a style clean-up). Product linking rule set: link up to collection + tradie/lifestyle hub pages only — no carpet-linking all sub-pages.</p>
+      </div>
+
+      <div style="margin-top:28px;">
+        <p class="section-head">TBC — Next Month</p>
+        <div class="work-item" style="border-color:var(--amber);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <h3>Confirm lifestyle page paid LP status</h3>
+            <span class="badge badge-tbc">TBC</span>
+          </div>
+          <p>Determine if /pages/foldingbuckets is an active Meta ads destination. If live: leave nav stripped, hub→sub-page linking goes to collection. If dead campaign: delete Custom Liquid block, restore nav, add hub→sub-page downlinks.</p>
+        </div>
+        <div class="work-item" style="border-color:var(--amber);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <h3>Fishing sub-page</h3>
+            <span class="badge badge-tbc">TBC</span>
+          </div>
+          <p>New /pages/ sub-page targeting fishing bucket cluster (600+ combined, all KD 0). H1 drafted: "Folding Fishing Bucket — Bait, Burley & Everything Aboard." Joins circle menu. Lifestyle hub links out to it on launch.</p>
+        </div>
+        <div class="work-item" style="border-color:var(--amber);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <h3>Housekeeping</h3>
+            <span class="badge badge-tbc">TBC</span>
+          </div>
+          <p>GSC submit + schema check on canopy guide. Sitemap regenerate + GSC submission (picks up bucket restructure + Packout decommission). Confirm Packout → Pack-A-Shelf + van/canopy 301 equity transferred (2/4-week re-pull).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT PLAN TAB -->
+    <div id="tab-plan" class="tab-panel">
+      <p class="section-head">Content roadmap — status as at Sep 2026</p>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+          <span class="cluster-tag cluster-canopy">Canopy / Ute</span>
+          <span style="font-weight:600;font-size:0.9rem;">Canopy Cluster</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Ford Ranger canopy hub (with model fit table)</div><div style="font-size:0.75rem;color:var(--muted);">Month 1 · Jun 2026</div></div>
+          <span></span><span class="mini-badge mb-live">Live</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Ultimate ute canopy fit-out guide</div><div style="font-size:0.75rem;color:var(--muted);">Month 1 · Jun 2026</div></div>
+          <span></span><span class="mini-badge mb-live">Live</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Canopy shelving vs drawers vs slides comparison</div><div style="font-size:0.75rem;color:var(--muted);">Month 1 · Jun 2026</div></div>
+          <span></span><span class="mini-badge mb-live">Live</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;border-bottom:none;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Tradie Canopy Setup guide</div><div style="font-size:0.75rem;color:var(--muted);">Sep 2026 — GSC submit TBC</div></div>
+          <span></span><span class="mini-badge mb-live">Live</span>
+        </div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+          <span class="cluster-tag cluster-van">Van</span>
+          <span style="font-weight:600;font-size:0.9rem;">Van Cluster</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Van optimisation pack — 5 van pages (titles, metas, FAQ, schema)</div><div style="font-size:0.75rem;color:var(--muted);">Jul 2026</div></div>
+          <span></span><span class="mini-badge mb-live">Live</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Van racking section (added to /pages/van-packout-shelving)</div><div style="font-size:0.75rem;color:var(--muted);">Aug 2026 · hit #4 immediately</div></div>
+          <span></span><span class="mini-badge mb-live">Live</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Caddy van shelving (landing page)</div><div style="font-size:0.75rem;color:var(--muted);">Aug 2026</div></div>
+          <span></span><span class="mini-badge mb-live">Live</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Electrician van setup (blog)</div><div style="font-size:0.75rem;color:var(--muted);">Aug 2026</div></div>
+          <span></span><span class="mini-badge mb-live">Live</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;border-bottom:none;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Plumber van setup (blog)</div><div style="font-size:0.75rem;color:var(--muted);">Aug 2026</div></div>
+          <span></span><span class="mini-badge mb-live">Live</span>
+        </div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+          <span class="cluster-tag cluster-bucket">Buckets</span>
+          <span style="font-weight:600;font-size:0.9rem;">Bucket Cluster</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Tradie page — heavy duty retarget + 4 accordion tabs</div><div style="font-size:0.75rem;color:var(--muted);">Sep 2026</div></div>
+          <span></span><span class="mini-badge mb-live">Live</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Beach, Livestock, Kids Sport, Camping, Home-DIY sub-pages</div><div style="font-size:0.75rem;color:var(--muted);">Pre-Sep — already live</div></div>
+          <span></span><span class="mini-badge mb-live">Live</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Fishing sub-page (bait · burley · live bait · berley cluster)</div><div style="font-size:0.75rem;color:var(--muted);">Oct 2026 — cluster ready</div></div>
+          <span></span><span class="mini-badge mb-tbc">TBC Oct</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;border-bottom:none;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Car wash bucket sub-page (two-bucket method cluster)</div><div style="font-size:0.75rem;color:var(--muted);">Parked — biggest lifestyle opportunity</div></div>
+          <span></span><span class="mini-badge mb-parked">Parked</span>
+        </div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+          <span class="cluster-tag cluster-harvest">Harvest</span>
+          <span style="font-weight:600;font-size:0.9rem;">Packout Harvest</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Canopy Packout shelving content</div><div style="font-size:0.75rem;color:var(--muted);">Jun 2026</div></div>
+          <span></span><span class="mini-badge mb-live">Live</span>
+        </div>
+        <div class="content-row" style="padding:12px 18px;border-bottom:none;">
+          <div><div style="font-size:0.85rem;color:var(--text);">Packout → Pack-A-Shelf 301 migration (once SKUs fully die)</div><div style="font-size:0.75rem;color:var(--muted);">Ongoing — confirm equity transfer each month</div></div>
+          <span></span><span class="mini-badge mb-tbc">Ongoing</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPPORTUNITIES TAB -->
+    <div id="tab-gaps" class="tab-panel">
+      <p class="section-head">Next builds + open technical items</p>
+
+      <div class="opp-card">
+        <div style="display:flex;align-items:start;justify-content:space-between;gap:12px;">
+          <div>
+            <h3>Fishing sub-page <span class="opp-vol">600+ vol · KD 0</span></h3>
+            <p>Cluster: fishing bucket 250 · bait bucket 150 · burley bucket 200 · berley bucket 90 · live bait bucket 200. All KD 0. H1 drafted. Exclude: bucket hat terms + brand terms (yeti, frabill, pryml, bcf, anaconda). Frame as carry-bait only — not an aerator.</p>
+          </div>
+          <span class="badge badge-tbc" style="white-space:nowrap;">Oct 2026</span>
+        </div>
+      </div>
+
+      <div class="opp-card">
+        <div style="display:flex;align-items:start;justify-content:space-between;gap:12px;">
+          <div>
+            <h3>Car wash bucket sub-page <span class="opp-vol">~1,150 vol · KD 0</span></h3>
+            <p>Cluster: car wash bucket 450 · car wash bucket kit 150 · two-bucket method 100+ · grit guard bucket. Fully orphaned on-site — nobody owns this. Biggest single lifestyle opportunity. Queue after fishing.</p>
+          </div>
+          <span class="badge badge-parked" style="white-space:nowrap;">Parked</span>
+        </div>
+      </div>
+
+      <div class="opp-card">
+        <div style="display:flex;align-items:start;justify-content:space-between;gap:12px;">
+          <div>
+            <h3>Van cannibalisation — still open</h3>
+            <p>"van shelving" held at #5 on /pages/van-shelving while /pages/van-packout-shelving is the stronger page. Two pages still competing for the same term. Decision needed: 301 /pages/van-shelving into the winner, or differentiate it hard. Rolled from Sep — resolve in the meta audit pass.</p>
+          </div>
+          <span class="badge badge-tbc" style="white-space:nowrap;">Oct</span>
+        </div>
+      </div>
+
+      <div class="opp-card">
+        <div style="display:flex;align-items:start;justify-content:space-between;gap:12px;">
+          <div>
+            <h3>Vehicle pages — Ranger, Hilux, D-Max, Triton, BT-50</h3>
+            <p>MAGNET layer. Fit data still needed from client to unblock these (dimensions, load ratings, rack compatibility per vehicle). High volume, KD 0. Each separate nameplate gets its own page; Raptor/Wildtrak are sections on the Ranger page.</p>
+          </div>
+          <span class="badge badge-parked" style="white-space:nowrap;">Blocked</span>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <p class="section-head">Technical housekeeping (TBC Oct)</p>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:0.83rem;display:flex;align-items:center;justify-content:space-between;">
+            <span>GSC submit + schema check — canopy setup guide</span>
+            <span class="mini-badge mb-tbc">TBC</span>
+          </div>
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:0.83rem;display:flex;align-items:center;justify-content:space-between;">
+            <span>Sitemap regenerate + GSC submission (post bucket restructure + Packout decommission)</span>
+            <span class="mini-badge mb-tbc">TBC</span>
+          </div>
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:0.83rem;display:flex;align-items:center;justify-content:space-between;">
+            <span>Confirm Packout → Pack-A-Shelf 301 equity transferred (2/4-week re-pull)</span>
+            <span class="mini-badge mb-tbc">TBC</span>
+          </div>
+          <div style="padding:12px 16px;font-size:0.83rem;display:flex;align-items:center;justify-content:space-between;">
+            <span>Lifestyle page: confirm paid LP vs organic hub (resolve Custom Liquid CSS strip)</span>
+            <span class="mini-badge mb-tbc">TBC</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const GATE_CODE = '3dpro-seo-2026';
+
+// ─── KEYWORD DATA ─────────────────────────────────────────────────────────────
+const KEYWORDS = [
+  { kw:'3d pro', pos:1, prev:1, traffic:189, vol:450, kd:54, cluster:'brand' },
+  { kw:'milwaukee battery holder', pos:4, prev:4, traffic:56, vol:600, kd:0, cluster:'money' },
+  { kw:'3d pro melbourne', pos:1, prev:1, traffic:53, vol:150, kd:0, cluster:'brand' },
+  { kw:'van storage', pos:3, prev:3, traffic:36, vol:300, kd:0, cluster:'van' },
+  { kw:'foldable bucket', pos:2, prev:2, traffic:36, vol:300, kd:0, cluster:'bucket' },
+  { kw:'packout slide', pos:1, prev:1, traffic:28, vol:70, kd:0, cluster:'harvest' },
+  { kw:'van shelving', pos:5, prev:5, traffic:28, vol:400, kd:24, cluster:'van' },
+  { kw:'packout crate', pos:3, prev:3, traffic:25, vol:250, kd:0, cluster:'harvest' },
+  { kw:'milwaukee packout organiser', pos:4, prev:4, traffic:24, vol:300, kd:0, cluster:'harvest' },
+  { kw:'milwaukee crate', pos:3, prev:3, traffic:22, vol:200, kd:0, cluster:'harvest' },
+  { kw:'collapsable bucket', pos:2, prev:2, traffic:21, vol:150, kd:0, cluster:'bucket' },
+  { kw:'milwaukee packout crate', pos:3, prev:3, traffic:19, vol:250, kd:0, cluster:'harvest' },
+  { kw:'milwaukee packout', pos:20, prev:15, traffic:19, vol:13000, kd:53, cluster:'harvest' },
+  { kw:'milwaukee organiser', pos:4, prev:4, traffic:18, vol:150, kd:0, cluster:'harvest' },
+  { kw:'ute shelving', pos:6, prev:9, traffic:17, vol:150, kd:0, cluster:'canopy' },
+  { kw:'van racking', pos:4, prev:4, traffic:16, vol:150, kd:2, cluster:'van' },
+  { kw:'folding bucket', pos:2, prev:2, traffic:16, vol:100, kd:0, cluster:'bucket' },
+  { kw:'ute drawers', pos:10, prev:10, traffic:16, vol:1300, kd:1, cluster:'canopy' },
+  { kw:'milwaukee packout organizer', pos:5, prev:5, traffic:15, vol:200, kd:0, cluster:'harvest' },
+  { kw:'packout dividers', pos:1, prev:1, traffic:13, vol:50, kd:0, cluster:'harvest' },
+  { kw:'m12 battery holder', pos:3, prev:3, traffic:12, vol:150, kd:0, cluster:'money' },
+  { kw:'milwaukee m12 battery holder', pos:2, prev:null, traffic:11, vol:70, kd:0, cluster:'money' },
+  { kw:'packout shelving', pos:1, prev:1, traffic:11, vol:30, kd:0, cluster:'harvest' },
+  { kw:'packout sale', pos:4, prev:4, traffic:11, vol:150, kd:0, cluster:'harvest' },
+  { kw:'canopy shelving', pos:8, prev:8, traffic:11, vol:250, kd:0, cluster:'canopy' },
+  { kw:'milwaukee packout accessories', pos:6, prev:4, traffic:10, vol:200, kd:0, cluster:'harvest' },
+  { kw:'milwaukee battery holders', pos:4, prev:null, traffic:10, vol:100, kd:78, cluster:'money' },
+  { kw:'milwaukee packout sale', pos:7, prev:7, traffic:10, vol:200, kd:0, cluster:'harvest' },
+  { kw:'black milwaukee packout', pos:4, prev:4, traffic:9, vol:150, kd:0, cluster:'harvest' },
+  { kw:'ute canopy shelving', pos:7, prev:7, traffic:9, vol:150, kd:18, cluster:'canopy' },
+  { kw:'van shelves', pos:3, prev:3, traffic:9, vol:100, kd:0, cluster:'van' },
+  { kw:'packout accessories', pos:4, prev:4, traffic:8, vol:80, kd:0, cluster:'harvest' },
+  { kw:'adelaide van shelving', pos:3, prev:3, traffic:8, vol:70, kd:0, cluster:'van' },
+  { kw:'20l bucket', pos:10, prev:10, traffic:8, vol:350, kd:0, cluster:'bucket' },
+  { kw:'milwaukee packout dividers', pos:2, prev:2, traffic:8, vol:70, kd:0, cluster:'harvest' },
+  { kw:'packout milwaukee', pos:11, prev:8, traffic:7, vol:500, kd:0, cluster:'harvest' },
+  { kw:'packout shelf', pos:2, prev:2, traffic:7, vol:50, kd:0, cluster:'harvest' },
+  { kw:'gpo cutout template', pos:2, prev:2, traffic:7, vol:60, kd:0, cluster:'money' },
+  { kw:'milwaukee packout mount', pos:2, prev:2, traffic:7, vol:60, kd:0, cluster:'harvest' },
+  { kw:'m18 battery holder', pos:4, prev:4, traffic:6, vol:80, kd:0, cluster:'money' },
+  { kw:'van shelving systems', pos:5, prev:5, traffic:6, vol:100, kd:24, cluster:'van' },
+  { kw:'packout box', pos:9, prev:9, traffic:6, vol:250, kd:0, cluster:'harvest' },
+  { kw:'horse feed buckets', pos:6, prev:9, traffic:5, vol:90, kd:0, cluster:'bucket' },
+  { kw:'milwaukee packout shelf', pos:2, prev:2, traffic:5, vol:40, kd:0, cluster:'harvest' },
+  { kw:'ute canopy drawers and shelves', pos:5, prev:5, traffic:5, vol:80, kd:0, cluster:'canopy' },
+  { kw:'packout van setup', pos:1, prev:2, traffic:5, vol:20, kd:0, cluster:'van' },
+  { kw:'van shelf', pos:3, prev:3, traffic:5, vol:50, kd:1, cluster:'van' },
+  { kw:'packout first aid kit', pos:4, prev:4, traffic:4, vol:70, kd:0, cluster:'harvest' },
+  { kw:'shelves for van', pos:7, prev:7, traffic:4, vol:100, kd:0, cluster:'van' },
+];
+
+const CLUSTER_LABELS = {
+  brand: { label: 'Brand', cls: 'cluster-harvest' },
+  money: { label: 'Pack-A-Shelf', cls: 'cluster-money' },
+  van: { label: 'Van', cls: 'cluster-van' },
+  bucket: { label: 'Buckets', cls: 'cluster-bucket' },
+  harvest: { label: 'Harvest', cls: 'cluster-harvest' },
+  canopy: { label: 'Canopy/Ute', cls: 'cluster-canopy' },
+};
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+function checkPw() {
+  const val = document.getElementById('pw').value;
+  if (val === GATE_CODE) {
+    try { sessionStorage.setItem('3dpro_auth', '1'); } catch(e){}
+    unlock();
+  } else {
+    document.getElementById('gate-err').textContent = 'Incorrect access code.';
+    document.getElementById('pw').value = '';
+    document.getElementById('pw').focus();
+  }
+}
+
+function unlock() {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  buildKwTable();
+}
+
+document.getElementById('pw').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkPw();
+});
+
+// Auto-unlock if session already authenticated
+try {
+  if (sessionStorage.getItem('3dpro_auth') === '1') { unlock(); }
+} catch(e) {}
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ─── RANKINGS TABLE ──────────────────────────────────────────────────────────
+function buildKwTable() {
+  const tbody = document.getElementById('kw-table-body');
+  tbody.innerHTML = KEYWORDS.map(k => {
+    const delta = (k.prev === null) ? null : k.prev - k.pos; // positive = improved
+    let posCls = 'pos-flat', posArrow = '–';
+    if (delta === null) { posCls = 'pos-up'; posArrow = '🆕'; }
+    else if (delta > 0) { posCls = 'pos-up'; posArrow = '▲ ' + delta; }
+    else if (delta < 0) { posCls = 'pos-down'; posArrow = '▼ ' + Math.abs(delta); }
+
+    const cl = CLUSTER_LABELS[k.cluster] || { label: k.cluster, cls: 'cluster-harvest' };
+
+    return `<tr>
+      <td class="primary">${k.kw}</td>
+      <td style="text-align:center;" class="primary"><strong>#${k.pos}</strong></td>
+      <td style="text-align:center;" class="${posCls}">${posArrow}</td>
+      <td style="text-align:right;" class="primary">${k.traffic}</td>
+      <td style="text-align:right;">${k.vol.toLocaleString()}</td>
+      <td style="text-align:right;">${k.kd}</td>
+      <td><span class="cluster-tag ${cl.cls}">${cl.label}</span></td>
+    </tr>`;
+  }).join('');
+}
+</script>
 </body>
 </html>
